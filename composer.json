@@ -1,0 +1,15 @@
+{
+  "name": "gandazgul/php-mongo-backend",
+  "description": "Generic REST backend for mongo",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Carlos Ravelo",
+      "email": "ravelo.carlos@gmail.com"
+    }
+  ],
+  "require": {
+    "klein/klein": "^2.1",
+    "vlucas/phpdotenv": "^2.0"
+  }
+}
