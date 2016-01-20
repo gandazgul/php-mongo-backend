@@ -4,7 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "cda20b4abc6308b12d458ac1b6ca9a45",
+    "hash": "40aca0f85cf51a331a965f0115cf8723",
+    "content-hash": "ce9f00cccd6dd47f09e42c211cc31e10",
     "packages": [
         {
             "name": "klein/klein",
@@ -63,6 +64,66 @@
             "time": "2014-11-07 07:35:23"
         },
         {
+            "name": "mongodb/mongodb",
+            "version": "1.0.0-beta2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mongodb/mongo-php-library.git",
+                "reference": "e8177e87efe74437b812915887d416f5b68b4e30"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mongodb/mongo-php-library/zipball/e8177e87efe74437b812915887d416f5b68b4e30",
+                "reference": "e8177e87efe74437b812915887d416f5b68b4e30",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mongodb": "^1.1.1",
+                "php": ">=5.4"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "MongoDB\\": "src/"
+                },
+                "files": [
+                    "src/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Jeremy Mikola",
+                    "email": "jmikola@gmail.com"
+                },
+                {
+                    "name": "Hannes Magnusson",
+                    "email": "bjori@mongodb.com"
+                },
+                {
+                    "name": "Derick Rethans",
+                    "email": "github@derickrethans.nl"
+                }
+            ],
+            "description": "MongoDB driver library",
+            "homepage": "https://jira.mongodb.org/browse/PHPLIB",
+            "keywords": [
+                "database",
+                "driver",
+                "mongodb",
+                "persistence"
+            ],
+            "time": "2015-12-28 19:40:56"
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v2.0.1",
             "source": {
@@ -112,7 +173,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "mongodb/mongodb": 10
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

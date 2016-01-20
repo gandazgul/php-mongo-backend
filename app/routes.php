@@ -2,16 +2,19 @@
 
 use Klein\Request;
 use Klein\Response;
+use MongoDB\BSON\ObjectID;
+use MongoDB\Client;
+use MongoDB\Driver\WriteConcern;
 
 require_once ROOT . '/vendor/autoload.php';
 
-$dotenv = new Dotenv\Dotenv(__DIR__);
+$dotenv = new Dotenv\Dotenv(ROOT);
 $dotenv->load();
 
 $app = new \Klein\Klein();
 
-$connection = new MongoClient("mongodb://" . getenv('DB_HOST') . ":" . getenv('DB_PORT'));
-$db = $connection->{getenv('DB_DATABASE')};
+$connection = new Client("mongodb://" . getenv('DB_HOST') . ":" . getenv('DB_PORT'));
+$db = $connection->selectDatabase(getenv('DB_DATABASE'));
 
 function make_response(Response $resp, $result)
 {
@@ -30,19 +33,30 @@ $app->get('/', function ()
 
 $app->get('/[:type]', function (Request $req, Response $resp) use ($db)
 {
-    $collection = $db->{$req->param('type')};
+    $collection_con = $db->selectCollection($req->param('type'));
 
-    $result = $collection->find();
+    $collection = $collection_con->find();
+    $result = [];
+    foreach ($collection as $doc)
+    {
+        $doc_array = (array)$doc;
+        $doc_array['_id'] = (string)$doc->_id;
+        $result[] = $doc_array;
+    }
 
-    return make_response($resp, iterator_to_array($result));
+    return make_response($resp, $result);
 });
 
 $app->get('/[:type]/[:id]', function (Request $req, Response $resp) use ($db)
 {
     $type = $req->param('type');
-    $collection = $db->{$type};
+    $collection_con = $db->selectCollection($type);
 
-    $result = $collection->findOne(['_id' => new MongoId($req->param('id'))]);
+    $doc = $collection_con->findOne(['_id' => new ObjectID($req->param('id'))]);
+
+    $doc_array = (array)$doc;
+    $doc_array['_id'] = (string)$doc->_id;
+    $result = $doc_array;
 
     return make_response($resp, $result);
 });
@@ -50,10 +64,15 @@ $app->get('/[:type]/[:id]', function (Request $req, Response $resp) use ($db)
 $app->post('/[:type]', function (Request $req, Response $resp) use ($db)
 {
     $doc = $req->paramsPost()->all();
+    $type = $req->param('type');
+    $collection = $db->selectCollection($type);
 
-    $collection = $db->{$type};
-
-    $result = $collection->insert($doc, ['w' => 1]);
+    $insertResult = $collection->insertOne($doc, ['writeConcern' => new WriteConcern(1)]);
+    $result = ['_id' => (string)$insertResult->getInsertedId()];
+    if ($insertResult->getInsertedCount() <= 0)
+    {
+        $result['err'] = 'The insert failed';
+    }
 
     return make_response($resp, $result);
 });
@@ -62,11 +81,16 @@ function put($type, $id, Request $req, Response $resp)
 {
     global $db;
 
-    $doc = $req->paramsPost()->all();
-    $collection = $db->{$type};
+    //klein doesnt support this
+    parse_str(file_get_contents('php://input'), $doc);
+    $collection = $db->selectCollection($type);
 
-    $result = $collection->update(['_id' => new MongoId($id)], $doc, ['upsert' => true, 'multiple' => false, 'w' => 1]);
-
+    $updateResult = $collection->replaceOne(['_id' => new ObjectID($id)], $doc, ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]);
+    $result = [];
+    if (($updateResult->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0)
+    {
+        $result['err'] = 'The update failed';
+    }
     return make_response($resp, $result);
 }
 
@@ -87,9 +111,15 @@ function delete($type, $id, Response $resp)
 {
     global $db;
 
-    $collection = $db->{$type};
+    $collection = $db->selectCollection($type);
 
-    $result = $collection->remove(['_id' => new MongoId($id)]);
+    $deleteResult = $collection->deleteOne(['_id' => new ObjectID($id)]);
+
+    $result = [];
+    if ($deleteResult->getDeletedCount() <= 0)
+    {
+        $result['err'] = 'The delete failed.';
+    }
 
     return make_response($resp, $result);
 }
