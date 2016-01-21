@@ -33,6 +33,7 @@ $app->get('/', function ()
 
 $app->get('/[:type]', function (Request $req, Response $resp) use ($db)
 {
+
     $collection_con = $db->selectCollection($req->param('type'));
 
     $collection = $collection_con->find();
@@ -56,16 +57,55 @@ $app->get('/[:type]/[:id]', function (Request $req, Response $resp) use ($db)
 
     $doc_array = (array)$doc;
     $doc_array['_id'] = (string)$doc->_id;
-    $result = $doc_array;
 
-    return make_response($resp, $result);
+    return make_response($resp, $doc_array);
 });
+
+function login(Request $req, Response $resp)
+{
+    global $db;
+
+    $params = $req->paramsPost()->all();
+    //$password = password_hash($params['password'], PASSWORD_DEFAULT);
+
+    $collection = $db->selectCollection('users');
+    $row = $collection->findOne(['user' => $params['user']]);
+
+    if ($row && password_verify($params['password'], $row->password))
+    {
+        $doc_array = (array)$row;
+        $doc_array['_id'] = (string)$row->_id;
+
+        return make_response($resp, $doc_array);
+    }
+    else
+    {
+        return $result['err'] = 'User login failed';
+    }
+
+}
 
 $app->post('/[:type]', function (Request $req, Response $resp) use ($db)
 {
-    $doc = $req->paramsPost()->all();
+
     $type = $req->param('type');
+
+    if ($type == 'login')
+    {
+        return login($req, $resp);
+    }
+
+    $doc = $req->paramsPost()->all();
+
+    // if any param named password encrypt
+    if ($doc['password'] != '')
+    {
+        $doc['password'] = password_hash($doc['password'], PASSWORD_DEFAULT);
+    }
+
+
     $collection = $db->selectCollection($type);
+
 
     $insertResult = $collection->insertOne($doc, ['writeConcern' => new WriteConcern(1)]);
     $result = ['_id' => (string)$insertResult->getInsertedId()];
@@ -85,12 +125,14 @@ function put($type, $id, Request $req, Response $resp)
     parse_str(file_get_contents('php://input'), $doc);
     $collection = $db->selectCollection($type);
 
-    $updateResult = $collection->replaceOne(['_id' => new ObjectID($id)], $doc, ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]);
+    $updateResult = $collection->replaceOne(['_id' => new ObjectID($id)], $doc, ['upsert' => true, 'multiple' => false,
+        'writeConcern' => new WriteConcern(1)]);
     $result = [];
     if (($updateResult->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0)
     {
         $result['err'] = 'The update failed';
     }
+
     return make_response($resp, $result);
 }
 
