@@ -2,7 +2,10 @@
 
 use Klein\Request;
 use Klein\Response;
+use Klein\ServiceProvider;
+use function MongoDB\BSON\fromJSON;
 use MongoDB\BSON\ObjectID;
+use function MongoDB\BSON\toPHP;
 use MongoDB\Client;
 use MongoDB\Driver\WriteConcern;
 
@@ -31,12 +34,24 @@ $app->get('/', function ()
     return 'SCT Generic Backend';
 });
 
-$app->get('/[:type]', function (Request $req, Response $resp) use ($db)
+$app->get('/[:type]', function (Request $req, Response $resp, ServiceProvider $service) use ($db, $app)
 {
 
-    $collection_con = $db->selectCollection($req->param('type'));
+    $type = $req->param('type');
 
-    $collection = $collection_con->find();
+    $where = $req->paramsGet()->get('where', '[]');
+    $query = json_decode($where, true);
+
+    switch($type){
+        case "test":
+            return $service->render(ROOT . 'views/test.phtml');
+            break;
+    }
+
+
+    $collection_con = $db->selectCollection($type);
+
+    $collection = $collection_con->find($query);
     $result = [];
     foreach ($collection as $doc)
     {
@@ -51,6 +66,7 @@ $app->get('/[:type]', function (Request $req, Response $resp) use ($db)
 $app->get('/[:type]/[:id]', function (Request $req, Response $resp) use ($db)
 {
     $type = $req->param('type');
+
     $collection_con = $db->selectCollection($type);
 
     $doc = $collection_con->findOne(['_id' => new ObjectID($req->param('id'))]);
@@ -178,6 +194,9 @@ $app->delete('/[:type]/[:id]', function (Request $req, Response $resp)
 {
     return delete($req->param('type'), $req->param('id'), $resp);
 });
+
+
+
 
 
 $app->dispatch();

@@ -9,5 +9,22 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="PHP">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/vendor/composer" />
+          <root url="file://$MODULE_DIR$/vendor/klein/klein" />
+          <root url="file://$MODULE_DIR$/vendor/mongodb/mongodb" />
+          <root url="file://$MODULE_DIR$/vendor/vlucas/phpdotenv" />
+        </CLASSES>
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/vendor/composer" />
+          <root url="file://$MODULE_DIR$/vendor/klein/klein" />
+          <root url="file://$MODULE_DIR$/vendor/mongodb/mongodb" />
+          <root url="file://$MODULE_DIR$/vendor/vlucas/phpdotenv" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="jquery-1.10.2" level="application" />
   </component>
 </module>
