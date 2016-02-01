@@ -21,6 +21,14 @@ class Controller
         $this->db = $db;
     }
 
+    /**
+     * Prepares and returns a response for the $result
+     *
+     * @param Response $resp
+     * @param $result
+     *
+     * @return \Klein\AbstractResponse|Response
+     */
     static function make_response(Response $resp, $result)
     {
         if (isset($result['err']))
@@ -31,6 +39,32 @@ class Controller
         $resp->header('Access-Control-Allow-Origin', 'http://backbone.local');
 
         return $resp->json($result);
+    }
+
+    /**
+     * Parses the body for POST and PUT
+     *
+     * @param Request $req
+     */
+    public function parse_body(Request $req)
+    {
+        //klein doesnt support this so we are doing it manually
+        $input = file_get_contents('php://input');
+
+        switch ($req->headers()->get('Content-Type'))
+        {
+            case 'application/json':
+                $req->parsedBody = json_decode($input, true);
+                break;
+            case 'application/x-www-form-urlencoded':
+                parse_str($input, $req->parsedBody);
+                break;
+        }
+    }
+
+    function home(Request $req, Response $resp, ServiceProvider $service)
+    {
+        $service->render(ROOT . 'views/crud_test.phtml');
     }
 
     function get_collection(Request $req, Response $resp, ServiceProvider $service)
@@ -80,6 +114,10 @@ class Controller
     {
         $type = $req->param('type');
         $doc = $req->paramsPost()->all();
+        if (!$doc)
+        {
+            $doc = $req->parsedBody;
+        }
 
         // if any param named password encrypt
         if (isset($doc['password']))
@@ -107,15 +145,13 @@ class Controller
         static::make_response($resp, $result);
     }
 
-    function update_entity_by_id($type, $id, Request $req, Response $resp)
+    function update_entity_by_id(Request $req, Response $resp)
     {
         global $db;
 
-        //klein doesnt support this so we are doing it manually
-        parse_str(file_get_contents('php://input'), $doc);
-        $collection = $db->selectCollection($type);
+        $collection = $db->selectCollection($req->paramsNamed()->get('type'));
 
-        $updateResult = $collection->replaceOne(['_id' => new ObjectID($id)], $doc, ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]);
+        $updateResult = $collection->replaceOne(['_id' => new ObjectID($req->paramsNamed()->get('id'))], $req->parsedBody, ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]);
 
         $result = [];
         if (($updateResult->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0)
@@ -126,13 +162,14 @@ class Controller
         return static::make_response($resp, $result);
     }
 
-    function delete_entity_by_id($type, $id, Response $resp)
+    function delete_entity_by_id(Request $req, Response $resp)
     {
         global $db;
 
-        $collection = $db->selectCollection($type);
 
-        $deleteResult = $collection->deleteOne(['_id' => new ObjectID($id)]);
+        $collection = $db->selectCollection($req->paramsNamed()->get('type'));
+
+        $deleteResult = $collection->deleteOne(['_id' => new ObjectID($req->paramsNamed()->get('id'))]);
 
         $result = [];
         if ($deleteResult->getDeletedCount() <= 0)

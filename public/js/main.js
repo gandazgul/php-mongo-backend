@@ -1,35 +1,104 @@
-(function ($) {
-    $('#btnGetUsers').on('click', function () {
-        var User = Backbone.Model.extend({});
-        var Users = Backbone.Collection.extend({
-            url: 'http://backend.local/users',
-            model: User
+App = window.App || {};
+
+(function ($)
+{
+    App.backendUrl = 'http://backend.local/';
+
+    var User = Backbone.Model.extend({
+        idAttribute: "_id"
+    });
+
+    var Users = Backbone.Collection.extend({
+        url: App.backendUrl + 'users',
+        model: User
+    });
+
+    var users = new Users;
+
+    var UserListView = Backbone.View.extend({
+        el: '#userList tbody',
+        template: _.template($('#userRowTempl').html()),
+        collection: users,
+        render: function ()
+        {
+            var html = '';
+            var view = this;
+
+            this.collection.models.forEach(function (user)
+            {
+                var defaultModel = {
+                    first_name: "",
+                    last_name: ""
+                };
+                var model = $.extend({}, defaultModel, user.attributes);
+
+                html += view.template(model);
+            });
+
+            this.$el.html(html);
+        }
+    });
+
+    var userListView = new UserListView();
+
+    $('#btnShowUserModal').on('click', function ()
+    {
+        $("#newUserModal").modal('show');
+    });
+
+    $('#btnCreateUser').on('click', function ()
+    {
+        var user = new User({
+            "first_name": "new test",
+            "last_name": "new test last",
+            "title": "some title",
+            "age": 25
+        }, {
+            "collection": users
         });
 
-        var users = new Users;
+        user.save(null, {
+            success: function ()
+            {
+                users.add([user]);
 
-        var UserListView = Backbone.View.extend({
-            'el': '#userList',
-            collection: users,
-            render: function () {
-                var html = '';
-
-                this.collection.models.forEach(function (user) {
-                    var $li = $('<li />').addClass('user').text(user.get('first_name') + ' ' + user.get('last_name'));
-
-                    html += $('<div />').append($li).html();
-                });
-
-                this.$el.html(html);
+                $("#newUserModal").modal('hide');
             }
         });
+    });
 
-        var userListView = new UserListView();
+    $('#userList').on('click', '.btn-delete-user', function ()
+    {
+        var $btn = $(this);
+        var $tr = $btn.closest('tr');
+        var id = $tr.data('id');
 
-        users.on('sync', function () {
+        var user = users.where({'_id': id});
+
+        if (user)
+        {
+            $tr.hide();
+
+            user[0].destroy({
+                success: function ()
+                {
+                    users.remove(user);
+                    $tr.remove();
+                },
+                error: function ()
+                {
+                    $tr.show();
+                }
+            });
+        }
+    });
+
+    $(document).ready(function ()
+    {
+        users.on('sync', function ()
+        {
             userListView.render();
         });
         users.fetch();
-
     });
 }(jQuery));

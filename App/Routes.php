@@ -18,16 +18,17 @@ class Routes
     {
         $controller = new Controller($db);
 
-        $app->get('/', function ()
-        {
-            return 'SCT Generic Backend';
-        });
+        //middleware
+        $app->respond([$controller, 'parse_body']);
+        $app->respond([$controller, 'db_service']);
 
+        //home
+        $app->get('/', [$controller, 'home']);
+
+        //Crud
         $app->get('/[a:type]', [$controller, 'get_collection']);
 
         $app->get('/[a:type]/[a:id]', [$controller, 'get_entity_by_id']);
-
-        $app->post('/auth/login', [$controller, 'login']);
 
         $app->post('/[a:type]', [$controller, 'create_entity']);
 
@@ -36,12 +37,12 @@ class Routes
          */
         $app->post('/put/[a:type]/[a:id]', function (Request $req, Response $resp) use ($controller)
         {
-            return $controller->update_entity_by_id($req->param('type'), $req->param('id'), $req, $resp);
+            return $controller->update_entity_by_id($req, $resp);
         });
 
         $app->put('/[a:type]/[a:id]', function (Request $req, Response $resp) use ($controller)
         {
-            return $controller->update_entity_by_id($req->param('type'), $req->param('id'), $req, $resp);
+            return $controller->update_entity_by_id($req, $resp);
         });
 
         /**
@@ -49,12 +50,15 @@ class Routes
          */
         $app->post('/delete/[a:type]/[a:id]', function (Request $req, Response $resp) use ($controller)
         {
-            return $controller->delete_entity_by_id($req->param('type'), $req->param('id'), $resp);
+            return $controller->delete_entity_by_id($req, $resp);
         });
 
         $app->delete('/[a:type]/[a:id]', function (Request $req, Response $resp) use ($controller)
         {
-            return $controller->delete_entity_by_id($req->param('type'), $req->param('id'), $resp);
+            return $controller->delete_entity_by_id($req, $resp);
         });
+
+        //auth
+        $app->post('/auth/login', [$controller, 'login']);
     }
 }

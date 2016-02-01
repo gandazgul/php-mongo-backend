@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Backnone Test</title>
+    <title>SCT Generic Backend</title>
 
     <link rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap-theme.css">
@@ -10,10 +10,48 @@
 </head>
 <body>
 
-<button id="btnGetUsers" class="btn btn-primary">Get users</button>
-<button class="btn btn-primary">Get a single user</button>
+<button id="btnShowUserModal" class="btn btn-primary">Create new user</button>
 
-<ul id="userList"></ul>
+<table id="userList" class="table table-striped">
+    <thead>
+    <tr>
+        <td>Name</td>
+        <td>Actions</td>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<div id="newUserModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">New User Information</h4>
+            </div>
+            <div class="modal-body">
+                <form action="">
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnCreateUser">Create User</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/x-handlebars-template" id="userRowTempl">
+    <tr data-id="<%= _id %>">
+        <td><%= first_name %> <%= last_name %></td>
+        <td>
+            <button class="btn btn-default btn-get-user-details">Get Details</button>
+            <button class="btn btn-default btn-delete-user">Delete</button>
+        </td>
+    </tr>
+</script>
 
 <script src="/vendor/jquery/dist/jquery.js"></script>
 <script src="/vendor/underscore/underscore.js"></script>
