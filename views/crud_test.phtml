@@ -32,7 +32,20 @@
             </div>
             <div class="modal-body">
                 <form action="">
-
+                    <div class="form-group">
+                        <label>
+                            Enter the user's JSON:
+                            <textarea class="user-json form-control" cols="60" rows="10"
+                                      placeholder="e.g. {&quot;first_name&quot;: &quot;John&quot;}"
+                            >{
+                                    "first_name": "new test",
+                                    "last_name": "new test last",
+                                    "title": "some title",
+                                    "age": 25
+                                }
+                            </textarea>
+                        </label>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -43,14 +56,51 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div id="userDetailsModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" data-templ="User <%= first_name %> <%= last_name %> Details"></h4>
+            </div>
+            <div class="modal-body">
+                <form action="">
+                    <div class="form-group">
+                        <label>
+                            You can modify this JSON and resubmit it:
+                            <textarea class="user-json form-control" cols="60" rows="10"></textarea>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger btn-delete-user">Delete User</button>
+                <button type="button" class="btn btn-primary btn-update-user">Update User</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <script type="text/x-handlebars-template" id="userRowTempl">
     <tr data-id="<%= _id %>">
         <td><%= first_name %> <%= last_name %></td>
         <td>
-            <button class="btn btn-default btn-get-user-details">Get Details</button>
-            <button class="btn btn-default btn-delete-user">Delete</button>
+            <button class="btn btn-primary btn-view-user">View/Update</button>
+            <button class="btn btn-danger btn-delete-user">Delete</button>
         </td>
     </tr>
+</script>
+
+<script type="text/x-handlebars-template" id="errorTempl">
+    <div class="alert alert-danger alert-dismissible fade in" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+        <h4>Oh snap! There was an error!</h4>
+        <p><%= message %></p>
+    </div>
 </script>
 
 <script src="/vendor/jquery/dist/jquery.js"></script>

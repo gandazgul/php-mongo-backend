@@ -3,7 +3,7 @@
 use Klein\Klein;
 use Klein\Request;
 use Klein\Response;
-use MongoDB\Database;
+use MongoDB\Client;
 use function MongoDB\BSON\fromJSON;
 use function MongoDB\BSON\toPHP;
 
@@ -14,13 +14,12 @@ use function MongoDB\BSON\toPHP;
  */
 class Routes
 {
-    public static function init(Klein $app, Database $db)
+    public static function init(Klein $app, Client $connection)
     {
-        $controller = new Controller($db);
+        $controller = new Controller($connection);
 
         //middleware
         $app->respond([$controller, 'parse_body']);
-        $app->respond([$controller, 'db_service']);
 
         //home
         $app->get('/', [$controller, 'home']);

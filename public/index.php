@@ -12,8 +12,7 @@ $dotenv->load();
 $app = new \Klein\Klein();
 
 $connection = new Client("mongodb://" . getenv('DB_HOST') . ":" . getenv('DB_PORT'));
-$db = $connection->selectDatabase(getenv('DB_DATABASE'));
 
-App\Routes::init($app, $db);
+App\Routes::init($app, $connection);
 
 $app->dispatch();

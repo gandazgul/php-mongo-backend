@@ -4,7 +4,8 @@ use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use MongoDB\BSON\ObjectID;
-use MongoDB\Database;
+use MongoDB\Client;
+use MongoDB\Driver\Exception\BulkWriteException;
 use MongoDB\Driver\WriteConcern;
 
 /**
@@ -15,10 +16,12 @@ use MongoDB\Driver\WriteConcern;
 class Controller
 {
     private $db;
+    private $connection;
 
-    public function __construct(Database $db)
+    public function __construct(Client $connection)
     {
-        $this->db = $db;
+        $this->connection = $connection;
+        $this->db = $connection->selectDatabase(getenv('DB_DATABASE'));
     }
 
     /**
@@ -78,6 +81,7 @@ class Controller
         {
             case "test":
                 $service->render(ROOT . 'views/test.phtml');
+
                 return null;
                 break;
         }
@@ -147,14 +151,27 @@ class Controller
 
     function update_entity_by_id(Request $req, Response $resp)
     {
-        global $db;
-
-        $collection = $db->selectCollection($req->paramsNamed()->get('type'));
-
-        $updateResult = $collection->replaceOne(['_id' => new ObjectID($req->paramsNamed()->get('id'))], $req->parsedBody, ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]);
-
+        $collection = $this->db->selectCollection($req->paramsNamed()->get('type'));
         $result = [];
-        if (($updateResult->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0)
+        $updateResult = null;
+
+        try
+        {
+            $doc = $req->parsedBody;
+            unset($doc['_id']);
+            $updateResult = $collection->replaceOne(
+                ['_id' => new ObjectID($req->paramsNamed()->get('id'))],
+                $doc,
+                ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]
+            );
+        }
+        catch (BulkWriteException $e)
+        {
+            $writeError = $e->getWriteResult()->getWriteErrors()[0];
+            $result['err'] = ($writeError->getMessage());
+        }
+
+        if ($updateResult && ($updateResult->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0)
         {
             $result['err'] = 'The update failed';
         }
@@ -164,10 +181,7 @@ class Controller
 
     function delete_entity_by_id(Request $req, Response $resp)
     {
-        global $db;
-
-
-        $collection = $db->selectCollection($req->paramsNamed()->get('type'));
+        $collection = $this->db->selectCollection($req->paramsNamed()->get('type'));
 
         $deleteResult = $collection->deleteOne(['_id' => new ObjectID($req->paramsNamed()->get('id'))]);
 
