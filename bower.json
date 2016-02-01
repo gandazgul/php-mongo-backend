@@ -1,0 +1,20 @@
+{
+  "name": "backbone-test",
+  "version": "0.0.1",
+  "authors": [
+    "Carlos Ravelo <ravelo.carlos@gmail.com>"
+  ],
+  "description": "backbone test",
+  "main": "index.html",
+  "keywords": [
+    "backbone"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

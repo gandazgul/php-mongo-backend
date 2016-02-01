@@ -12,5 +12,10 @@
     "klein/klein": "^2.1",
     "vlucas/phpdotenv": "^2.0",
     "mongodb/mongodb": "^1.0.0@beta"
+  },
+  "autoload": {
+    "psr-0": {
+      "App\\": "./"
+    }
   }
 }
