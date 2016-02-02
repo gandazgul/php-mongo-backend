@@ -1,6 +1,6 @@
 # php-mongo-backend
 
-Generic REST backend for mongo written in PHP using the [klein.php](https://github.com/chriso/klein.php) router and the default mongo client.
+Generic REST backend for MongoDB written in PHP using the [klein.php](https://github.com/chriso/klein.php) router and the default MongoDB client. Includes a FE based on bootstrap and Backbone.JS models and views.
 
 ## Routes
 
