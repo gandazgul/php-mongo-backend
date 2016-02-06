@@ -5,6 +5,7 @@ use Klein\Response;
 use Klein\ServiceProvider;
 use MongoDB\BSON\ObjectID;
 use MongoDB\Client;
+use MongoDB\Database;
 use MongoDB\Driver\Exception\BulkWriteException;
 use MongoDB\Driver\WriteConcern;
 
@@ -15,6 +16,7 @@ use MongoDB\Driver\WriteConcern;
  */
 class Controller
 {
+    /** @var Database */
     private $db;
     private $connection;
 
@@ -67,7 +69,7 @@ class Controller
 
     function home(Request $req, Response $resp, ServiceProvider $service)
     {
-        $service->render(ROOT . 'views/crud_test.phtml');
+        $service->render(ROOT . 'views/crud.phtml');
     }
 
     function get_collection(Request $req, Response $resp, ServiceProvider $service)

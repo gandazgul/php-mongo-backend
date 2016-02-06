@@ -6,7 +6,14 @@ App = window.App || {};
     App.backendUrl = 'http://backend.local/';
 
     var User = Backbone.Model.extend({
-        idAttribute: "_id"
+        idAttribute: "_id",
+        getName: function ()
+        {
+            var first_name = this.attributes['first_name'] || '';
+            var last_name = this.attributes['last_name'] || '';
+
+            return first_name + ' ' + last_name;
+        }
     });
 
     var Users = Backbone.Collection.extend({
@@ -206,6 +213,7 @@ App = window.App || {};
             });
         }
     });
+    var createUserModalView = new CreateUserModalView();
 
     /**
      * Whole App view
@@ -214,7 +222,8 @@ App = window.App || {};
         el: 'body',
         model: App,
         events: {
-            "click #btnShowUserModal": 'showUserModal'
+            "click #btnShowUserModal": 'showUserModal',
+            "click #btnSortUsers": 'sortUsers'
         },
         render: function ()
         {
@@ -227,8 +236,37 @@ App = window.App || {};
         },
         showUserModal: function ()
         {
-            var createUserModalView = new CreateUserModalView();
             createUserModalView.render();
+        },
+        sortUsers: function (e)
+        {
+            var $btn = $(e.target);
+            var desc = $btn.hasClass('desc');
+
+            $btn.toggleClass('desc');
+
+            users.comparator = function (userA, userB)
+            {
+                var a = userA.getName().toLowerCase();
+                var b = userB.getName().toLowerCase();
+
+                if (a !== b)
+                {
+                    if (a > b || a === void 0)
+                    {
+                        return desc ? 1 : -1;
+                    }
+                    if (a < b || b === void 0)
+                    {
+                        return desc ? -1 : 1;
+                    }
+                }
+
+                return 0;
+            };
+            users.sort();
+
+            userListView.render();
         }
     });
 
