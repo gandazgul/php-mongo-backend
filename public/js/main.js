@@ -3,7 +3,7 @@ App = window.App || {};
 (function ($)
 {
     //App init, data =========================================================================
-    App.backendUrl = 'http://backend.local/';
+    App.backendUrl = '//' + $('meta[name="base_url"]').prop('content');
 
     var User = Backbone.Model.extend({
         idAttribute: "_id",
@@ -17,7 +17,7 @@ App = window.App || {};
     });
 
     var Users = Backbone.Collection.extend({
-        url: App.backendUrl + 'users',
+        url: App.backendUrl + '/users',
         model: User
     });
 
