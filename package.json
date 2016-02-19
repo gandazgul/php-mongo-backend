@@ -1,0 +1,26 @@
+{
+  "name": "php-mongo-backend",
+  "version": "1.0.0",
+  "description": "Generic RESTful mongo backend written in PHP",
+  "main": " ",
+  "dependencies": {
+    "bower": "^1.7.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gandazgul/php-mongo-backend.git"
+  },
+  "keywords": [
+    "mongo"
+  ],
+  "author": "Carlos Ravelo <ravelo.carlos@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gandazgul/php-mongo-backend/issues"
+  },
+  "homepage": "https://github.com/gandazgul/php-mongo-backend#readme"
+}
