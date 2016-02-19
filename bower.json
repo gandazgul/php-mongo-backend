@@ -1,13 +1,13 @@
 {
-  "name": "backbone-test",
+  "name": "php-mongo-backend",
   "version": "0.0.1",
   "authors": [
     "Carlos Ravelo <ravelo.carlos@gmail.com>"
   ],
-  "description": "backbone test",
+  "description": "PHP Mongo Generic RESTful Backend",
   "main": "index.html",
   "keywords": [
-    "backbone"
+    "backbone, mongo, php, rest, api"
   ],
   "license": "MIT",
   "ignore": [
@@ -16,5 +16,9 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "backbone": "~1.2.3",
+    "bootstrap": "~3.3.6"
+  }
 }
