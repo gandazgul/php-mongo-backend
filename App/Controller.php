@@ -29,12 +29,13 @@ class Controller
     /**
      * Prepares and returns a response for the $result
      *
+     * @param Request $req
      * @param Response $resp
+     * @param ServiceProvider $service
      * @param $result
-     *
      * @return \Klein\AbstractResponse|Response
      */
-    static function make_response(Response $resp, $result)
+    static function make_response(Request $req, Response $resp, ServiceProvider $service, $result)
     {
         if (isset($result['err']))
         {
@@ -42,6 +43,15 @@ class Controller
         }
 
         $resp->header('Access-Control-Allow-Origin', 'http://backbone.local');
+
+        $acceptHeader = new AcceptHeader($req->headers()->get('accept'));
+        $acceptHeader = array_column($acceptHeader->getArrayCopy(), 'raw');
+
+        if (in_array('text/html', $acceptHeader))
+        {
+            $service->render(ROOT . 'views/crud.phtml');
+            return false;
+        }
 
         return $resp->json($result);
     }
@@ -99,10 +109,10 @@ class Controller
             $result[] = $doc_array;
         }
 
-        return static::make_response($resp, $result);
+        return static::make_response($req, $resp, $service, $result);
     }
 
-    function get_entity_by_id(Request $req, Response $resp)
+    function get_entity_by_id(Request $req, Response $resp, ServiceProvider $service)
     {
         $type = $req->param('type');
 
@@ -113,10 +123,10 @@ class Controller
         $doc_array = (array)$doc;
         $doc_array['_id'] = (string)$doc->_id;
 
-        return static::make_response($resp, $doc_array);
+        return static::make_response($req, $resp, $service, $doc_array);
     }
 
-    function create_entity(Request $req, Response $resp)
+    function create_entity(Request $req, Response $resp, ServiceProvider $service)
     {
         $type = $req->param('type');
         $doc = $req->paramsPost()->all();
@@ -141,17 +151,17 @@ class Controller
             $result['err'] = 'The insert failed';
         }
 
-        return static::make_response($resp, $result);
+        return static::make_response($req, $resp, $service, $result);
     }
 
-    function login(Request $req, Response $resp)
+    function login(Request $req, Response $resp, ServiceProvider $service)
     {
         $result = Auth::login($req, $this->db);
 
-        static::make_response($resp, $result);
+        static::make_response($req, $resp, $service, $result);
     }
 
-    function update_entity_by_id(Request $req, Response $resp)
+    function update_entity_by_id(Request $req, Response $resp, ServiceProvider $service)
     {
         $collection = $this->db->selectCollection($req->paramsNamed()->get('type'));
         $result = [];
@@ -178,10 +188,10 @@ class Controller
             $result['err'] = 'The update failed';
         }
 
-        return static::make_response($resp, $result);
+        return static::make_response($req, $resp, $service, $result);
     }
 
-    function delete_entity_by_id(Request $req, Response $resp)
+    function delete_entity_by_id(Request $req, Response $resp, ServiceProvider $service)
     {
         $collection = $this->db->selectCollection($req->paramsNamed()->get('type'));
 
@@ -193,6 +203,6 @@ class Controller
             $result['err'] = 'The delete failed.';
         }
 
-        return static::make_response($resp, $result);
+        return static::make_response($req, $resp, $service, $result);
     }
 }
