@@ -27,5 +27,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="jquery-1.10.2" level="application" />
+    <orderEntry type="library" name="php-mongo-backend node_modules" level="project" />
   </component>
 </module>

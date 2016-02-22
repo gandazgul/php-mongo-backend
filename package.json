@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "Generic RESTful mongo backend written in PHP",
   "main": " ",
-  "dependencies": {
-    "bower": "^1.7.7"
+  "dependencies": {},
+  "devDependencies": {
+    "bower": "^1.7.7",
+    "gulp": "^3.9.1"
+    "gulp-riot": "^0.4.6"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
