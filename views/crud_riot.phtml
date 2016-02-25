@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SCT Generic Backend</title>
+
+    <meta name="base_url" content="<?= getenv('BASE_URL'); ?>"/>
+
+    <link rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap-theme.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<entity-list></entity-list>
+
+<new-user-modal></new-user-modal>
+
+<script src="/vendor/jquery/dist/jquery.min.js"></script>
+<script src="/vendor/underscore/underscore.js"></script>
+<script src="/vendor/bootstrap/dist/js/bootstrap.js"></script>
+<script src="/vendor/backbone/backbone.js"></script>
+<script src="/vendor/riot/riot.min.js"></script>
+
+<script src="/js/components/entity-list.js"></script>
+<script src="/js/components/new-user-modal.js"></script>
+<script src="/js/main.riot.js"></script>
+</body>
+</html>

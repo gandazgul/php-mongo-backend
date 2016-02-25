@@ -42,18 +42,23 @@ class Controller
             return $resp->code(500)->body($result['err'])->send();
         }
 
-        $resp->header('Access-Control-Allow-Origin', 'http://backbone.local');
+        $resp->header('Access-Control-Allow-Origin', getenv('BASE_URL'));
 
         $acceptHeader = new AcceptHeader($req->headers()->get('accept'));
         $acceptHeader = array_column($acceptHeader->getArrayCopy(), 'raw');
 
         if (in_array('text/html', $acceptHeader))
         {
-            $service->render(ROOT . 'views/crud.phtml');
+            $service->render(ROOT . 'views/crud_riot.phtml');
             return false;
         }
 
         return $resp->json($result);
+    }
+
+    static function send_404(Request $req, Response $resp)
+    {
+        return $resp->code(404)->body("Entity not found");
     }
 
     /**
@@ -79,7 +84,7 @@ class Controller
 
     function home(Request $req, Response $resp, ServiceProvider $service)
     {
-        $service->render(ROOT . 'views/crud.phtml');
+        $service->render(ROOT . 'views/crud_riot.phtml');
     }
 
     function get_collection(Request $req, Response $resp, ServiceProvider $service)
@@ -120,10 +125,17 @@ class Controller
 
         $doc = $collection_con->findOne(['_id' => new ObjectID($req->param('id'))]);
 
-        $doc_array = (array)$doc;
-        $doc_array['_id'] = (string)$doc->_id;
+        if ($doc)
+        {
+            $doc_array = (array)$doc;
+            $doc_array['_id'] = (string)$doc->_id;
 
-        return static::make_response($req, $resp, $service, $doc_array);
+            return static::make_response($req, $resp, $service, $doc_array);
+        }
+        else
+        {
+            return static::send_404($req, $resp);
+        }
     }
 
     function create_entity(Request $req, Response $resp, ServiceProvider $service)
