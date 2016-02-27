@@ -12,20 +12,30 @@
         </tr>
         </thead>
         <tbody>
-        <tr each="{ opts.entities.models }" data-id="{ attributes._id }">
+        <tr each="{ App.entities.models }" data-id="{ attributes._id }">
             <td>{ attributes._id }</td>
             <td>
                 <button class="btn btn-primary btn-view-user">View/Update</button>
-                <button class="btn btn-danger btn-delete-user">Delete</button>
+                <button class="btn btn-danger btn-delete-user" onclick="{ deleteUser }">Delete</button>
             </td>
         </tr>
         </tbody>
     </table>
 
     <script>
+        var App = opts.App;
+
         this.showNewEntityModal = function ()
         {
             $('#newUserModal').modal('show');
+        };
+
+        this.deleteUser = function (e)
+        {
+            var $btn = $(e.target);
+            var $tr = $btn.closest('tr');
+
+            App.deleteUser($tr);
         };
     </script>
 </entity-list>

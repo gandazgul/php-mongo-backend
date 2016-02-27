@@ -3,6 +3,7 @@
 use Klein\Klein;
 use Klein\Request;
 use Klein\Response;
+use Klein\ServiceProvider;
 use MongoDB\Client;
 use function MongoDB\BSON\fromJSON;
 use function MongoDB\BSON\toPHP;
@@ -34,27 +35,32 @@ class Routes
         /**
          * This route will stand for put if PUT is not available on the client
          */
-        $app->post('/put/[a:type]/[a:id]', function (Request $req, Response $resp) use ($controller)
+        $app->post(
+            '/put/[a:type]/[a:id]', function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
         {
-            return $controller->update_entity_by_id($req, $resp);
+            return $controller->update_entity_by_id($req, $resp, $service);
         });
 
-        $app->put('/[a:type]/[a:id]', function (Request $req, Response $resp) use ($controller)
+        $app->put(
+            '/[a:type]/[a:id]', function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
         {
-            return $controller->update_entity_by_id($req, $resp);
+            return $controller->update_entity_by_id($req, $resp, $service);
         });
 
         /**
          * This route will stand for delete if DELETE is not available on the client
          */
-        $app->post('/delete/[a:type]/[a:id]', function (Request $req, Response $resp) use ($controller)
+        $app->post(
+            '/delete/[a:type]/[a:id]',
+            function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
         {
-            return $controller->delete_entity_by_id($req, $resp);
+            return $controller->delete_entity_by_id($req, $resp, $service);
         });
 
-        $app->delete('/[a:type]/[a:id]', function (Request $req, Response $resp) use ($controller)
+        $app->delete(
+            '/[a:type]/[a:id]', function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
         {
-            return $controller->delete_entity_by_id($req, $resp);
+            return $controller->delete_entity_by_id($req, $resp, $service);
         });
 
         //auth

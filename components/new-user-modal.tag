@@ -36,17 +36,20 @@
     </div><!-- /.modal -->
 
     <script>
+        var App = this.opts.App;
+
         this.createUser = function ()
         {
             var $modal = $(this.newUserModal);
-            var entity = new opts.EntityModel(JSON.parse($modal.find('.user-json').val()), {
-                "collection": opts.entities
+            var entity = new App.EntityModel(JSON.parse($modal.find('.user-json').val()), {
+                "collection": App.entities
             });
 
             entity.save(null, {
                 success: function ()
                 {
-                    opts.entities.add([entity]);
+                    App.entities.add([entity]);
+
 
                     $modal.modal('hide');
                 }
