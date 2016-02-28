@@ -6,4 +6,13 @@
         <h4>Oh snap! There was an error!</h4>
         <p>{ opts.message }</p>
     </div>
+
+    <script>
+        var tag = this;
+
+        setTimeout(function ()
+        {
+            tag.unmount();
+        }, 2500 + 130 * Math.sqrt(opts.message.length));
+    </script>
 </alert>

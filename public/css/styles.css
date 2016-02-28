@@ -6,3 +6,8 @@ body {
 #userList {
     margin-top: 40px;
 }
+
+.alert {
+    width: 70%;
+    margin: 0 auto;
+}

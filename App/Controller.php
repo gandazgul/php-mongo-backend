@@ -1,5 +1,6 @@
 <?php namespace App;
 
+use Klein\Exceptions\DispatchHaltedException;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
@@ -7,7 +8,9 @@ use MongoDB\BSON\ObjectID;
 use MongoDB\Client;
 use MongoDB\Database;
 use MongoDB\Driver\Exception\BulkWriteException;
+use MongoDB\Driver\Exception\RuntimeException;
 use MongoDB\Driver\WriteConcern;
+use MongoDB\Model\CollectionInfo;
 use Settings\AppSettings;
 use Settings\DBSettings;
 
@@ -34,14 +37,18 @@ class Controller
      * @param Request $req
      * @param Response $resp
      * @param ServiceProvider $service
-     * @param $result
+     * @param array $result Defaults to empty
+     *
      * @return \Klein\AbstractResponse|Response
      */
-    static function make_response(Request $req, Response $resp, ServiceProvider $service, $result)
+    static function make_response(Request $req, Response $resp, ServiceProvider $service, $result = [])
     {
         if (isset($result['err']))
         {
-            return $resp->code(500)->body($result['err'])->send();
+            $resp->code(500)->body($result['err'])->send();
+
+            //ugly way of stopping klein from matching more routes because ->json sends the response
+            throw new DispatchHaltedException(null, DispatchHaltedException::SKIP_REMAINING);
         }
 
         $resp->header('Access-Control-Allow-Origin', AppSettings::$base_url);
@@ -52,10 +59,14 @@ class Controller
         if (in_array('text/html', $acceptHeader))
         {
             $service->render(ROOT . 'views/crud.phtml');
-            return false;
+
+            return $resp;
         }
 
-        return $resp->json($result);
+        $resp->json($result);
+
+        //ugly way of stopping klein from matching more routes because ->json sends the response
+        throw new DispatchHaltedException(null, DispatchHaltedException::SKIP_REMAINING);
     }
 
     static function send_404(Request $req, Response $resp)
@@ -84,23 +95,84 @@ class Controller
         }
     }
 
-    function home(Request $req, Response $resp, ServiceProvider $service)
+    function get_collections(Request $req, Response $resp, ServiceProvider $service)
     {
-        $service->render(ROOT . 'views/crud.phtml');
+        $collections = $this->db->listCollections(
+            [
+                "includeSystemCollections" => false,
+                "filter" => [
+                    'name' => [
+                        '$regex' => '^(?!system\.).*',
+                    ],
+                ],
+            ]
+        );
+
+        $collections = array_map(
+            function (CollectionInfo $collection)
+            {
+                return $collection->getName();
+            }, iterator_to_array($collections)
+        );
+
+        static::make_response($req, $resp, $service, $collections);
     }
 
-    function get_collection(Request $req, Response $resp, ServiceProvider $service)
+    /**
+     * Creates a new collection
+     *
+     * @param Request $req
+     * @param Response $resp
+     * @param ServiceProvider $service
+     */
+    function create_collection(Request $req, Response $resp, ServiceProvider $service)
+    {
+        $name = $req->paramsPost()->get('name', null);
+
+        if ($name)
+        {
+            try
+            {
+                $this->db->createCollection($name);
+
+                static::make_response($req, $resp, $service);
+            }
+            catch (RuntimeException $e)
+            {
+                static::make_response(
+                    $req, $resp, $service, [
+                    'err' => $e->getMessage(),
+                ]
+                );
+            }
+        }
+        else
+        {
+            static::make_response(
+                $req, $resp, $service, [
+                'err' => "name is a required parameter to create a collection",
+            ]
+            );
+        }
+    }
+
+    function home(Request $req, Response $resp, ServiceProvider $service)
+    {
+        $service->render(ROOT . 'views/home.phtml');
+    }
+
+    function get_entity_set(Request $req, Response $resp, ServiceProvider $service)
     {
         $type = $req->param('type');
 
         $where = $req->paramsGet()->get('where', '[]');
         $query = json_decode($where, true);
 
-        $collection_con = $this->db->selectCollection($type);
+        $collection = $this->db->selectCollection($type);
 
-        $collection = $collection_con->find($query);
+        $set = $collection->find($query);
         $result = [];
-        foreach ($collection as $doc)
+        foreach ($set as $doc)
         {
             $doc_array = (array)$doc;
             $doc_array['_id'] = (string)$doc->_id;

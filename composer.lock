@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "939a86c956363ace65b61eba9f4bf201",
-    "content-hash": "f0acc3683bbf862d9c4ff08bcdb490f9",
+    "hash": "222837f64afc555906163e5abfe2f60b",
+    "content-hash": "0bb5fbff3a13d0b5060104a02eaad540",
     "packages": [
         {
             "name": "klein/klein",
@@ -127,9 +127,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "mongodb/mongodb": 10
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

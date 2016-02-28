@@ -25,15 +25,24 @@ class Routes
         //home
         $app->get('/', [$controller, 'home']);
 
-        //Crud
-        $app->get('/[a:type]', [$controller, 'get_collection']);
+        //auth
+        $app->post('/auth/login', [$controller, 'login']);
+
+        //collections routes
+        //list collections
+        $app->get('/collections', [$controller, 'get_collections']);
+        //explicitly create new collection (posting a new entity to a non-existent collection creates it)
+        $app->post('/collections', [$controller, 'create_collection']);
+
+        //Generic entity Crud
+        $app->get('/[a:type]', [$controller, 'get_entity_set']);
 
         $app->get('/[a:type]/[a:id]', [$controller, 'get_entity_by_id']);
 
         $app->post('/[a:type]', [$controller, 'create_entity']);
 
         /**
-         * This route will stand for put if PUT is not available on the client
+         * This route will stand for PUT if it is not available on the client
          */
         $app->post(
             '/put/[a:type]/[a:id]', function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
@@ -48,7 +57,7 @@ class Routes
         });
 
         /**
-         * This route will stand for delete if DELETE is not available on the client
+         * This route will stand for DELETE if it is not available on the client
          */
         $app->post(
             '/delete/[a:type]/[a:id]',
@@ -62,8 +71,5 @@ class Routes
         {
             return $controller->delete_entity_by_id($req, $resp, $service);
         });
-
-        //auth
-        $app->post('/auth/login', [$controller, 'login']);
     }
 }
