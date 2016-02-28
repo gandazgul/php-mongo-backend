@@ -93,13 +93,13 @@ App = window.App || {};
 
             this.$el.modal('show');
         },
-        deleteUser: function ()
+        deleteEntity: function ()
         {
             var id = this.model.attributes['_id'];
             var $tr = $('#userList').find('tr[data-id="' + id + '"]');
             var view = this;
 
-            deleteUser($tr, function ()
+            deleteEntity($tr, function ()
             {
                 view.$el.modal('hide');
             });
@@ -177,12 +177,12 @@ App = window.App || {};
                 modalView.render();
             }
         },
-        deleteUser: function (e)
+        deleteEntity: function (e)
         {
             var $btn = $(e.target);
             var $tr = $btn.closest('tr');
 
-            deleteUser($tr);
+            deleteEntity($tr);
         }
     });
     var userListView = new UserListView();
@@ -190,13 +190,13 @@ App = window.App || {};
     var CreateUserModalView = Backbone.View.extend({
         el: '#newUserModal',
         events: {
-            'click #btnCreateUser': 'createUser'
+            'click #btnCreateUser': 'createEntity'
         },
         render: function ()
         {
             this.$el.modal('show');
         },
-        createUser: function ()
+        createEntity: function ()
         {
             var $modal = this.$el;
             var user = new User(JSON.parse($modal.find('.user-json').val()), {

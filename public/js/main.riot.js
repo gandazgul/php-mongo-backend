@@ -26,7 +26,7 @@ App = window.App || {};
      * @param $tr
      * @param callback
      */
-    App.deleteUser = function ($tr, callback)
+    App.deleteEntity = function ($tr, callback)
     {
         var answer = window.confirm("Are you sure?");
         if (answer)
@@ -42,7 +42,6 @@ App = window.App || {};
                         success: function ()
                         {
                             App.entities.remove(entity);
-                            $tr.remove();
 
                             if (callback)
                             {
@@ -59,11 +58,12 @@ App = window.App || {};
         }
     };
 
-    riot.mount('new-user-modal', {App: App});
+    riot.mount('new-entity-modal', {App: App});
+    riot.mount('view-update-modal', {App: App});
     var entityList = riot.mount('entity-list', {App: App});
     entityList = entityList && entityList[0];
 
-    App.entities.on('sync', function ()
+    App.entities.on('sync remove', function ()
     {
         entityList.update();
     });

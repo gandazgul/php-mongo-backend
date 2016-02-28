@@ -1,8 +1,10 @@
 <entity-list>
-    <button id="btnShowNewEntityModal" class="btn btn-primary" onclick="{ showNewEntityModal }">Create new {
-        opts.entity_name }
+    <button id="btnShowNewEntityModal" class="btn btn-primary" onclick="{ showNewEntityModal }">
+        Create new { App.entity_name }
     </button>
-    <button id="btnSortEntities" class="btn btn-primary desc">Sort { opts.entity_name }</button>
+    <button id="btnSortEntities" class="btn btn-primary desc" onclick="{ sortEntities }">
+        Sort { App.entity_name }
+    </button>
 
     <table id="userList" class="table table-striped">
         <thead>
@@ -15,8 +17,8 @@
         <tr each="{ App.entities.models }" data-id="{ attributes._id }">
             <td>{ attributes._id }</td>
             <td>
-                <button class="btn btn-primary btn-view-user">View/Update</button>
-                <button class="btn btn-danger btn-delete-user" onclick="{ deleteUser }">Delete</button>
+                <button class="btn btn-primary btn-view-user" onclick="{ showUpdateEntityModal }">View/Update</button>
+                <button class="btn btn-danger btn-delete-user" onclick="{ deleteEntity }">Delete</button>
             </td>
         </tr>
         </tbody>
@@ -27,15 +29,70 @@
 
         this.showNewEntityModal = function ()
         {
-            $('#newUserModal').modal('show');
+            $('#newEntityModal').modal('show');
         };
 
-        this.deleteUser = function (e)
+        this.deleteEntity = function (e)
         {
             var $btn = $(e.target);
             var $tr = $btn.closest('tr');
 
-            App.deleteUser($tr);
+            App.deleteEntity($tr);
         };
+
+        this.sortEntities = function (e)
+        {
+            var $btn = $(e.target);
+            var desc = $btn.hasClass('desc');
+
+            $btn.toggleClass('desc');
+
+            App.entities.comparator = function (entityA, entityB)
+            {
+                var a = entityA.attributes._id;
+                var b = entityB.attributes._id;
+
+                if (a !== b)
+                {
+                    if (a > b || a === void 0)
+                    {
+                        return desc ? 1 : -1;
+                    }
+                    if (a < b || b === void 0)
+                    {
+                        return desc ? -1 : 1;
+                    }
+                }
+
+                return 0;
+            };
+            App.entities.sort();
+
+            //this will refresh the view
+            App.entities.trigger('sync');
+        };
+
+        this.showUpdateEntityModal = function (e)
+        {
+            var $btn = $(e.target);
+            var $tr = $btn.closest('tr');
+            var $entityDetailsModal = $("#entityDetailsModal");
+
+            var id = $tr.data('id');
+            var entity = App.entities.findWhere({'_id': id});
+
+            //set the id for the other buttons
+            $entityDetailsModal.data('id', entity.attributes['_id']);
+
+            //Render the title
+            var $title = $entityDetailsModal.find('.modal-title');
+            var titleTmpl = _.template($title.data('templ'));
+            $title.text(titleTmpl(entity.attributes));
+
+            //set the user info
+            $entityDetailsModal.find('.user-json').val(JSON.stringify(entity.attributes));
+
+            $entityDetailsModal.modal('show');
+        }
     </script>
 </entity-list>
