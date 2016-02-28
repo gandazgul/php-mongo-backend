@@ -8,6 +8,8 @@ use MongoDB\Client;
 use MongoDB\Database;
 use MongoDB\Driver\Exception\BulkWriteException;
 use MongoDB\Driver\WriteConcern;
+use Settings\AppSettings;
+use Settings\DBSettings;
 
 /**
  * Class Controller
@@ -23,7 +25,7 @@ class Controller
     public function __construct(Client $connection)
     {
         $this->connection = $connection;
-        $this->db = $connection->selectDatabase(getenv('DB_DATABASE'));
+        $this->db = $connection->selectDatabase(DBSettings::$db_database);
     }
 
     /**
@@ -42,7 +44,7 @@ class Controller
             return $resp->code(500)->body($result['err'])->send();
         }
 
-        $resp->header('Access-Control-Allow-Origin', getenv('BASE_URL'));
+        $resp->header('Access-Control-Allow-Origin', AppSettings::$base_url);
 
         $acceptHeader = new AcceptHeader($req->headers()->get('accept'));
         $acceptHeader = array_column($acceptHeader->getArrayCopy(), 'raw');

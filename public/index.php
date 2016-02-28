@@ -1,17 +1,16 @@
 <?php
 
 use MongoDB\Client;
+use Settings\DBSettings;
 
 define('ROOT', realpath(__DIR__ . '/../') . '/');
 
 require_once ROOT . '/vendor/autoload.php';
-
-$dotenv = new Dotenv\Dotenv(ROOT);
-$dotenv->load();
+require_once ROOT . '/settings.php';
 
 $app = new \Klein\Klein();
 
-$connection = new Client("mongodb://" . getenv('DB_HOST') . ":" . getenv('DB_PORT'));
+$connection = new Client("mongodb://" . DBSettings::$db_host . ":" . DBSettings::$db_port);
 
 App\Routes::init($app, $connection);
 

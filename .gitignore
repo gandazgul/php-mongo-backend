@@ -1,5 +1,6 @@
-.env
 vendor/
 public/vendor/
 public/js/components/
 node_modules/
+
+settings.php
