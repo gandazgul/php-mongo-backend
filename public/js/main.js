@@ -3,276 +3,74 @@ App = window.App || {};
 (function ($)
 {
     //App init, data =========================================================================
-    App.backendUrl = '//' + $('meta[name="base_url"]').prop('content');
+    App.backendUrl = location.protocol + '//' + $('meta[name="base_url"]').prop('content');
 
-    var User = Backbone.Model.extend({
-        idAttribute: "_id",
-        getName: function ()
-        {
-            var first_name = this.attributes['first_name'] || '';
-            var last_name = this.attributes['last_name'] || '';
+    var path_parts = location.pathname.split('/');
+    App.entity_name = (path_parts && path_parts[1]) || 'users';
 
-            return first_name + ' ' + last_name;
-        }
+    App.EntityModel = Backbone.Model.extend({
+        idAttribute: "_id"
     });
 
-    var Users = Backbone.Collection.extend({
-        url: App.backendUrl + '/users',
-        model: User
+    var Entities = Backbone.Collection.extend({
+        url: App.backendUrl + '/' + App.entity_name,
+        model: App.EntityModel
     });
 
-    var users = new Users;
+    App.entities = new Entities();
 
-    // Common functions =======================================================================
     /**
      * Deletes a user
-     * Called from the details modal and from the delete action on the users list
+     * Called from the details modal and from the delete action on the entity list
      *
      * @param $tr
      * @param callback
      */
-    function deleteUser($tr, callback)
+    App.deleteEntity = function ($tr, callback)
     {
         var answer = window.confirm("Are you sure?");
         if (answer)
         {
             var id = $tr.data('id');
-            var user = users.findWhere({'_id': id});
+            var entity = App.entities.findWhere({'_id': id});
 
-            if (user)
+            if (entity)
             {
-                $tr.hide();
-
-                user.destroy({
-                    success: function ()
-                    {
-                        users.remove(user);
-                        $tr.remove();
-
-                        if (callback)
+                $tr.fadeOut(400, function ()
+                {
+                    entity.destroy({
+                        success: function ()
                         {
-                            callback();
+                            App.entities.remove(entity);
+
+                            if (callback)
+                            {
+                                callback();
+                            }
+                        },
+                        error: function ()
+                        {
+                            $tr.show();
                         }
-                    },
-                    error: function ()
-                    {
-                        $tr.show();
-                    }
+                    });
                 });
             }
         }
-    }
+    };
 
-    // Views ========================================================================================
-    /**
-     * User details modal, user update and another delete button
-     */
-    var UserDetailModalView = Backbone.View.extend({
-        el: '#userDetailsModal',
-        events: {
-            "click .btn-update-user": "updateUser",
-            "click .btn-delete-user": "deleteUser"
-        },
-        initialize: function (user)
-        {
-            this.model = user;
-        },
-        render: function ()
-        {
-            //set the id for the other buttons
-            var attributes = this.model.attributes;
-            this.$el.data('id', attributes['_id']);
+    riot.mount('new-entity-modal', {App: App});
+    riot.mount('view-update-modal', {App: App});
+    var entityList = riot.mount('entity-list', {App: App});
+    entityList = entityList && entityList[0];
 
-            //Render the title
-            var $title = this.$el.find('.modal-title');
-            var titleTmpl = _.template($title.data('templ'));
-            $title.text(titleTmpl(attributes));
-
-            //set the user info
-            this.$el.find('.user-json').val(JSON.stringify(attributes));
-
-            this.$el.modal('show');
-        },
-        deleteEntity: function ()
-        {
-            var id = this.model.attributes['_id'];
-            var $tr = $('#userList').find('tr[data-id="' + id + '"]');
-            var view = this;
-
-            deleteEntity($tr, function ()
-            {
-                view.$el.modal('hide');
-            });
-        },
-        updateUser: function ()
-        {
-            var user = this.model;
-            var view = this;
-
-            if (user)
-            {
-                user.attributes = JSON.parse(this.$el.find('.user-json').val());
-                user.save(null, {
-                    success: function ()
-                    {
-                        users.add([user]);
-                        userListView.render();
-
-                        view.$el.modal('hide');
-                    },
-                    error: function (model, jqXHR)
-                    {
-                        var errorTempl = _.template($('#errorTempl').html());
-                        var $modalBody = view.$el.find('.modal-body');
-
-                        $modalBody.find('.alert').remove();
-
-                        $modalBody.prepend(errorTempl({"message": jqXHR.responseText}));
-                    }
-                });
-            }
-        }
-    });
-
-    /**
-     * User table with action buttons
-     */
-    var UserListView = Backbone.View.extend({
-        el: '#userList tbody',
-        events: {
-            "click .btn-view-user": "viewUser",
-            "click .btn-delete-user": "deleteUser"
-        },
-        template: _.template($('#userRowTempl').html()),
-        collection: users,
-        render: function ()
-        {
-            var html = '';
-            var view = this;
-
-            this.collection.models.forEach(function (user)
-            {
-                var defaultModel = {
-                    first_name: "",
-                    last_name: ""
-                };
-                var model = $.extend({}, defaultModel, user.attributes);
-
-                html += view.template(model);
-            });
-
-            this.$el.html(html);
-        },
-        viewUser: function (e)
-        {
-            var $btn = $(e.target);
-            var $tr = $btn.closest('tr');
-            var id = $tr.data('id');
-
-            var user = users.findWhere({'_id': id});
-
-            if (user)
-            {
-                var modalView = new UserDetailModalView(user);
-                modalView.render();
-            }
-        },
-        deleteEntity: function (e)
-        {
-            var $btn = $(e.target);
-            var $tr = $btn.closest('tr');
-
-            deleteEntity($tr);
-        }
-    });
-    var userListView = new UserListView();
-
-    var CreateUserModalView = Backbone.View.extend({
-        el: '#newUserModal',
-        events: {
-            'click #btnCreateUser': 'createEntity'
-        },
-        render: function ()
-        {
-            this.$el.modal('show');
-        },
-        createEntity: function ()
-        {
-            var $modal = this.$el;
-            var user = new User(JSON.parse($modal.find('.user-json').val()), {
-                "collection": users
-            });
-
-            user.save(null, {
-                success: function ()
-                {
-                    users.add([user]);
-
-                    $modal.modal('hide');
-                }
-            });
-        }
-    });
-    var createUserModalView = new CreateUserModalView();
-
-    /**
-     * Whole App view
-     */
-    var AppView = Backbone.View.extend({
-        el: 'body',
-        model: App,
-        events: {
-            "click #btnShowUserModal": 'showUserModal',
-            "click #btnSortUsers": 'sortUsers'
-        },
-        render: function ()
-        {
-            users.on('sync', function ()
-            {
-                userListView.render();
-            });
-
-            users.fetch();
-        },
-        showUserModal: function ()
-        {
-            createUserModalView.render();
-        },
-        sortUsers: function (e)
-        {
-            var $btn = $(e.target);
-            var desc = $btn.hasClass('desc');
-
-            $btn.toggleClass('desc');
-
-            users.comparator = function (userA, userB)
-            {
-                var a = userA.getName().toLowerCase();
-                var b = userB.getName().toLowerCase();
-
-                if (a !== b)
-                {
-                    if (a > b || a === void 0)
-                    {
-                        return desc ? 1 : -1;
-                    }
-                    if (a < b || b === void 0)
-                    {
-                        return desc ? -1 : 1;
-                    }
-                }
-
-                return 0;
-            };
-            users.sort();
-
-            userListView.render();
-        }
+    App.entities.on('sync remove', function ()
+    {
+        entityList.update();
     });
 
     $(document).ready(function ()
     {
-        var appView = new AppView();
-        appView.render();
-    });
+        App.entities.fetch();
+    })
+
 }(jQuery));

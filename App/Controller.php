@@ -51,7 +51,7 @@ class Controller
 
         if (in_array('text/html', $acceptHeader))
         {
-            $service->render(ROOT . 'views/crud_riot.phtml');
+            $service->render(ROOT . 'views/crud.phtml');
             return false;
         }
 
@@ -86,7 +86,7 @@ class Controller
 
     function home(Request $req, Response $resp, ServiceProvider $service)
     {
-        $service->render(ROOT . 'views/crud_riot.phtml');
+        $service->render(ROOT . 'views/crud.phtml');
     }
 
     function get_collection(Request $req, Response $resp, ServiceProvider $service)
@@ -95,15 +95,6 @@ class Controller
 
         $where = $req->paramsGet()->get('where', '[]');
         $query = json_decode($where, true);
-
-        switch ($type)
-        {
-            case "test":
-                $service->render(ROOT . 'views/test.phtml');
-
-                return null;
-                break;
-        }
 
         $collection_con = $this->db->selectCollection($type);
 
