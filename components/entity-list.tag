@@ -1,8 +1,9 @@
 <entity-list>
-    <button id="btnShowNewEntityModal" class="btn btn-primary" onclick="{ showNewEntityModal }">
+    <a class="btn btn-default" href="/"><< Back</a>
+    <button class="btn btn-primary" onclick="{ showNewEntityModal }">
         Create new { App.entity_name }
     </button>
-    <button id="btnSortEntities" class="btn btn-primary desc" onclick="{ sortEntities }">
+    <button class="btn btn-primary desc" onclick="{ sortEntities }">
         Sort { App.entity_name }
     </button>
 
@@ -17,7 +18,7 @@
         <tr each="{ App.entities.models }" data-id="{ attributes._id }">
             <td>{ attributes._id }</td>
             <td>
-                <button class="btn btn-primary btn-view-user" onclick="{ showUpdateEntityModal }">View/Update</button>
+                <button class="btn btn-success btn-view-user" onclick="{ showUpdateEntityModal }">View/Update</button>
                 <button class="btn btn-danger btn-delete-user" onclick="{ deleteEntity }">Delete</button>
             </td>
         </tr>
