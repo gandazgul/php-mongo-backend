@@ -35,7 +35,7 @@
             var id = $modal.data('id');
             var $tr = $('#userList').find('tr[data-id="' + id + '"]');
 
-            App.deleteEntity($tr);
+            App.deleteEntity($tr, App.entities);
         };
 
         this.updateEntity = function ()

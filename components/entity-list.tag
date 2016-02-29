@@ -34,10 +34,9 @@
 
         this.deleteEntity = function (e)
         {
-            var $btn = $(e.target);
-            var $tr = $btn.closest('tr');
+            var $tr = $(e.target).closest('tr');
 
-            App.deleteEntity($tr);
+            App.deleteEntity($tr, App.entities);
         };
 
         this.sortEntities = function (e)

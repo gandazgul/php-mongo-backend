@@ -95,6 +95,13 @@ class Controller
         }
     }
 
+    /**
+     * Lists collections, output is similar to a mongo document to make it easier to manage in the FE
+     *
+     * @param Request $req
+     * @param Response $resp
+     * @param ServiceProvider $service
+     */
     function get_collections(Request $req, Response $resp, ServiceProvider $service)
     {
         $collections = $this->db->listCollections(
@@ -111,7 +118,11 @@ class Controller
         $collections = array_map(
             function (CollectionInfo $collection)
             {
-                return $collection->getName();
+                return [
+                    // names are unique, need this to manage them on the FE
+                    '_id' => $collection->getName(),
+                    'name' => $collection->getName(),
+                ];
             }, iterator_to_array($collections)
         );
 
@@ -156,6 +167,51 @@ class Controller
         }
     }
 
+    /**
+     * Drops a collection
+     *
+     * @param Request $req
+     * @param Response $resp
+     * @param ServiceProvider $service
+     */
+    function delete_collection(Request $req, Response $resp, ServiceProvider $service)
+    {
+        $name = $req->paramsNamed()->get('id', null);
+
+        if ($name)
+        {
+            try
+            {
+                $this->db->dropCollection($name);
+
+                static::make_response($req, $resp, $service);
+            }
+            catch (RuntimeException $e)
+            {
+                static::make_response(
+                    $req, $resp, $service, [
+                        'err' => $e->getMessage(),
+                    ]
+                );
+            }
+        }
+        else
+        {
+            static::make_response(
+                $req, $resp, $service, [
+                    'err' => "name is a required parameter to create a collection",
+                ]
+            );
+        }
+    }
+
+    /**
+     * Renders the home page
+     *
+     * @param Request $req
+     * @param Response $resp
+     * @param ServiceProvider $service
+     */
     function home(Request $req, Response $resp, ServiceProvider $service)
     {
         $service->render(ROOT . 'views/home.phtml');

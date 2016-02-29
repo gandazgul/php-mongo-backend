@@ -1,10 +1,7 @@
-App = window.App || {};
+var App = window.App || {};
 
 (function ($)
 {
-    //App init, data =========================================================================
-    App.backendUrl = location.protocol + '//' + $('meta[name="base_url"]').prop('content');
-
     var path_parts = location.pathname.split('/');
     App.entity_name = (path_parts && path_parts[1]) || 'users';
 
@@ -19,45 +16,6 @@ App = window.App || {};
 
     App.entities = new Entities();
 
-    /**
-     * Deletes a user
-     * Called from the details modal and from the delete action on the entity list
-     *
-     * @param $tr
-     * @param callback
-     */
-    App.deleteEntity = function ($tr, callback)
-    {
-        var answer = window.confirm("Are you sure?");
-        if (answer)
-        {
-            var id = $tr.data('id');
-            var entity = App.entities.findWhere({'_id': id});
-
-            if (entity)
-            {
-                $tr.fadeOut(400, function ()
-                {
-                    entity.destroy({
-                        success: function ()
-                        {
-                            App.entities.remove(entity);
-
-                            if (callback)
-                            {
-                                callback();
-                            }
-                        },
-                        error: function ()
-                        {
-                            $tr.show();
-                        }
-                    });
-                });
-            }
-        }
-    };
-
     riot.mount('new-entity-modal', {App: App});
     riot.mount('view-update-modal', {App: App});
     var entityList = riot.mount('entity-list', {App: App});
@@ -71,6 +29,5 @@ App = window.App || {};
     $(document).ready(function ()
     {
         App.entities.fetch();
-    })
-
+    });
 }(jQuery));

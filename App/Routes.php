@@ -31,8 +31,10 @@ class Routes
         //collections routes
         //list collections
         $app->get('/collections', [$controller, 'get_collections']);
-        //explicitly create new collection (posting a new entity to a non-existent collection creates it)
+        //explicitly create new collection
         $app->post('/collections', [$controller, 'create_collection']);
+        //drop a collection
+        $app->delete('/collections/[a:id]', [$controller, 'delete_collection']);
 
         //Generic entity Crud
         $app->get('/[a:type]', [$controller, 'get_entity_set']);
