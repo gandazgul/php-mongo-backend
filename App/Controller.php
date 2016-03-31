@@ -90,7 +90,10 @@ class Controller
                 $req->parsedBody = json_decode($input, true);
                 break;
             case 'application/x-www-form-urlencoded':
-                parse_str($input, $req->parsedBody);
+                $parsed = [];
+                parse_str($input, $parsed);
+
+                $req->parsedBody = $parsed;
                 break;
         }
     }

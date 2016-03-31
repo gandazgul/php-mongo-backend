@@ -1,18 +1,18 @@
 <?php namespace App;
-/**
- * Note : Code is released under the GNU LGPL
- *
- * Please do not change the header of this file
- *
- * This library is free software; you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * See the GNU Lesser General Public License for more details.
- */
+    /**
+     * Note : Code is released under the GNU LGPL
+     *
+     * Please do not change the header of this file
+     *
+     * This library is free software; you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation; either version 2 of
+     * the License, or (at your option) any later version.
+     *
+     * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+     * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+     *
+     * See the GNU Lesser General Public License for more details.
+     */
 
 /**
  * The AcceptHeader page will parse and sort the different
@@ -20,18 +20,20 @@
  *
  * @author      Pierrick Charron <pierrick@webstart.fr>
  */
-class AcceptHeader extends \ArrayObject {
+class AcceptHeader extends \ArrayObject
+{
 
     /**
      * Constructor
      *
      * @param string $header Value of the Accept header
+     *
      * @return void
      */
     public function __construct($header)
     {
         $acceptedTypes = $this->_parse($header);
-        usort($acceptedTypes, array($this, '_compare'));
+        usort($acceptedTypes, [$this, '_compare']);
         parent::__construct($acceptedTypes);
     }
 
@@ -40,31 +42,39 @@ class AcceptHeader extends \ArrayObject {
      * all the informations about the Accepted types
      *
      * @param string $header Value of the Accept header
+     *
      * @return array
      */
-    private function _parse($data)
+    private function _parse($header)
     {
-        $array = array();
-        $items = explode(',', $data);
-        foreach ($items as $item) {
+        if (!$header)
+        {
+            return [];
+        }
+
+        $array = [];
+        $items = explode(',', $header);
+        foreach ($items as $item)
+        {
             $elems = explode(';', $item);
 
-            $acceptElement = array();
+            $acceptElement = [];
             $mime = current($elems);
             list($type, $subtype) = explode('/', $mime);
             $acceptElement['type'] = trim($type);
             $acceptElement['subtype'] = trim($subtype);
             $acceptElement['raw'] = $mime;
 
-            $acceptElement['params'] = array();
-            while(next($elems)) {
+            $acceptElement['params'] = [];
+            while (next($elems))
+            {
                 list($name, $value) = explode('=', current($elems));
-                $acceptElement['params'][trim($name)] = trim($value);
+                $acceptElement['params'][ trim($name) ] = trim($value);
             }
 
             $array[] = $acceptElement;
-
         }
+
         return $array;
     }
 
@@ -74,24 +84,35 @@ class AcceptHeader extends \ArrayObject {
      *
      * @param array $a The first media type and its parameters
      * @param array $b The second media type and its parameters
+     *
      * @return int
      */
-    private function _compare($a, $b) {
+    private function _compare($a, $b)
+    {
         $a_q = isset($a['params']['q']) ? floatval($a['params']['q']) : 1.0;
         $b_q = isset($b['params']['q']) ? floatval($b['params']['q']) : 1.0;
-        if ($a_q === $b_q) {
+        if ($a_q === $b_q)
+        {
             $a_count = count($a['params']);
             $b_count = count($b['params']);
-            if ($a_count === $b_count) {
-                if ($r = $this->_compareSubType($a['subtype'], $b['subtype'])) {
+            if ($a_count === $b_count)
+            {
+                if ($r = $this->_compareSubType($a['subtype'], $b['subtype']))
+                {
                     return $r;
-                } else {
+                }
+                else
+                {
                     return $this->_compareSubType($a['type'], $b['type']);
                 }
-            } else {
+            }
+            else
+            {
                 return $a_count < $b_count;
             }
-        } else {
+        }
+        else
+        {
             return $a_q < $b_q;
         }
     }
@@ -101,15 +122,21 @@ class AcceptHeader extends \ArrayObject {
      *
      * @param string $a First subtype to compare
      * @param string $b Second subtype to compare
+     *
      * @return int
      */
     private function _compareSubType($a, $b)
     {
-        if ($a === '*' && $b !== '*') {
+        if ($a === '*' && $b !== '*')
+        {
             return 1;
-        } elseif ($b === '*' && $a !== '*') {
+        }
+        elseif ($b === '*' && $a !== '*')
+        {
             return -1;
-        } else {
+        }
+        else
+        {
             return 0;
         }
     }

@@ -2,6 +2,7 @@
 
 use Klein\Request;
 use MongoDB\Database;
+use Settings\AppSettings;
 
 /**
  * Class Auth
@@ -12,16 +13,19 @@ class Auth
 {
     public static function login(Request $req, Database $db)
     {
-        $params = $req->paramsPost()->all();
-        //$password = password_hash($params['password'], PASSWORD_DEFAULT);
+        $password = $req->paramsPost()->get('password');
+        $username = $req->paramsPost()->get('username');
 
         $collection = $db->selectCollection('users');
-        $row = $collection->findOne(['user' => $params['user']]);
+        $row = $collection->findOne(['username' => $username]);
 
-        if ($row && password_verify($params['password'], $row->password))
+        if ($row && password_verify($password, $row->password))
         {
             $doc_array = (array)$row;
             $doc_array['_id'] = (string)$row->_id;
+            //create a token
+            $doc_array['token'] = hash_hmac('sha256', $username . AppSettings::$secret, AppSettings::$secret);
+            unset($doc_array['password']);
 
             return $doc_array;
         } else
