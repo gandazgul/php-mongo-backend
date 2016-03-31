@@ -43,8 +43,7 @@ class Controller
      */
     static function make_response(Request $req, Response $resp, ServiceProvider $service, $result = [])
     {
-        if (isset($result['err']))
-        {
+        if (isset($result['err'])) {
             $resp->code(500)->body($result['err'])->send();
 
             //ugly way of stopping klein from matching more routes because ->json sends the response
@@ -56,8 +55,7 @@ class Controller
         $acceptHeader = new AcceptHeader($req->headers()->get('accept'));
         $acceptHeader = array_column($acceptHeader->getArrayCopy(), 'raw');
 
-        if (in_array('text/html', $acceptHeader))
-        {
+        if (in_array('text/html', $acceptHeader)) {
             $service->render(ROOT . 'views/crud.phtml');
 
             return $resp;
@@ -84,8 +82,7 @@ class Controller
         //klein doesnt support this so we are doing it manually
         $input = file_get_contents('php://input');
 
-        switch ($req->headers()->get('Content-Type'))
-        {
+        switch ($req->headers()->get('Content-Type')) {
             case 'application/json':
                 $req->parsedBody = json_decode($input, true);
                 break;
@@ -119,8 +116,7 @@ class Controller
         );
 
         $collections = array_map(
-            function (CollectionInfo $collection)
-            {
+            function (CollectionInfo $collection) {
                 return [
                     // names are unique, need this to manage them on the FE
                     '_id' => $collection->getName(),
@@ -143,29 +139,23 @@ class Controller
     {
         $name = $req->paramsPost()->get('name', null);
 
-        if ($name)
-        {
-            try
-            {
+        if ($name) {
+            try {
                 $this->db->createCollection($name);
 
                 static::make_response($req, $resp, $service);
-            }
-            catch (RuntimeException $e)
-            {
+            } catch (RuntimeException $e) {
                 static::make_response(
                     $req, $resp, $service, [
-                    'err' => $e->getMessage(),
-                ]
+                        'err' => $e->getMessage(),
+                    ]
                 );
             }
-        }
-        else
-        {
+        } else {
             static::make_response(
                 $req, $resp, $service, [
-                'err' => "name is a required parameter to create a collection",
-            ]
+                    'err' => "name is a required parameter to create a collection",
+                ]
             );
         }
     }
@@ -181,25 +171,19 @@ class Controller
     {
         $name = $req->paramsNamed()->get('id', null);
 
-        if ($name)
-        {
-            try
-            {
+        if ($name) {
+            try {
                 $this->db->dropCollection($name);
 
                 static::make_response($req, $resp, $service);
-            }
-            catch (RuntimeException $e)
-            {
+            } catch (RuntimeException $e) {
                 static::make_response(
                     $req, $resp, $service, [
                         'err' => $e->getMessage(),
                     ]
                 );
             }
-        }
-        else
-        {
+        } else {
             static::make_response(
                 $req, $resp, $service, [
                     'err' => "name is a required parameter to create a collection",
@@ -231,8 +215,7 @@ class Controller
 
         $set = $collection->find($query);
         $result = [];
-        foreach ($set as $doc)
-        {
+        foreach ($set as $doc) {
             $doc_array = (array)$doc;
             $doc_array['_id'] = (string)$doc->_id;
             $result[] = $doc_array;
@@ -249,15 +232,12 @@ class Controller
 
         $doc = $collection_con->findOne(['_id' => new ObjectID($req->param('id'))]);
 
-        if ($doc)
-        {
+        if ($doc) {
             $doc_array = (array)$doc;
             $doc_array['_id'] = (string)$doc->_id;
 
             return static::make_response($req, $resp, $service, $doc_array);
-        }
-        else
-        {
+        } else {
             return static::send_404($req, $resp);
         }
     }
@@ -266,14 +246,12 @@ class Controller
     {
         $type = $req->param('type');
         $doc = $req->paramsPost()->all();
-        if (!$doc)
-        {
+        if (!$doc) {
             $doc = $req->parsedBody;
         }
 
         // if any param named password encrypt
-        if (isset($doc['password']))
-        {
+        if (isset($doc['password'])) {
             $doc['password'] = password_hash($doc['password'], PASSWORD_DEFAULT);
         }
 
@@ -282,8 +260,7 @@ class Controller
         $insertResult = $collection->insertOne($doc, ['writeConcern' => new WriteConcern(1)]);
 
         $result = ['_id' => (string)$insertResult->getInsertedId()];
-        if ($insertResult->getInsertedCount() <= 0)
-        {
+        if ($insertResult->getInsertedCount() <= 0) {
             $result['err'] = 'The insert failed';
         }
 
@@ -303,8 +280,7 @@ class Controller
         $result = [];
         $updateResult = null;
 
-        try
-        {
+        try {
             $doc = $req->parsedBody;
             unset($doc['_id']);
             $updateResult = $collection->replaceOne(
@@ -312,15 +288,12 @@ class Controller
                 $doc,
                 ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]
             );
-        }
-        catch (BulkWriteException $e)
-        {
+        } catch (BulkWriteException $e) {
             $writeError = $e->getWriteResult()->getWriteErrors()[0];
             $result['err'] = ($writeError->getMessage());
         }
 
-        if ($updateResult && ($updateResult->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0)
-        {
+        if ($updateResult && ($updateResult->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0) {
             $result['err'] = 'The update failed';
         }
 
@@ -334,11 +307,22 @@ class Controller
         $deleteResult = $collection->deleteOne(['_id' => new ObjectID($req->paramsNamed()->get('id'))]);
 
         $result = [];
-        if ($deleteResult->getDeletedCount() <= 0)
-        {
+        if ($deleteResult->getDeletedCount() <= 0) {
             $result['err'] = 'The delete failed.';
         }
 
         return static::make_response($req, $resp, $service, $result);
     }
+
+    function verifyToken(Request $req, Response $resp, ServiceProvider $service)
+    {
+        $result = Auth::verifyToken($req);
+
+        if (!$result) {
+            $resp->code(403);
+        }
+
+        static::make_response($req, $resp, $service, $result);
+    }
+
 }
