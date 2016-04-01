@@ -50,6 +50,10 @@ class Controller
             //ugly way of stopping klein from matching more routes because ->json sends the response
             throw new DispatchHaltedException(null, DispatchHaltedException::SKIP_REMAINING);
         }
+        elseif (isset($result['code']) && $result['code'] != 200)
+        {
+            $resp->code($result['code']);
+        }
 
         $resp->header('Access-Control-Allow-Origin', AppSettings::$base_url);
 
@@ -290,11 +294,30 @@ class Controller
         return static::make_response($req, $resp, $service, $result);
     }
 
+    /**
+     * Attempt a login
+     *
+     * @param Request $req
+     * @param Response $resp
+     * @param ServiceProvider $service
+     *
+     * @return \Klein\AbstractResponse|Response
+     */
     function login(Request $req, Response $resp, ServiceProvider $service)
     {
         $result = Auth::login($req, $this->db);
 
-        static::make_response($req, $resp, $service, $result);
+        if (!empty($result['err']))
+        {
+            return static::make_response(
+                $req, $resp, $service, [
+                'error' => $result['err'],
+                'code' => 403,
+            ]
+            );
+        }
+
+        return static::make_response($req, $resp, $service, $result);
     }
 
     function update_entity_by_id(Request $req, Response $resp, ServiceProvider $service)

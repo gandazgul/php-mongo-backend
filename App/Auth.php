@@ -28,9 +28,10 @@ class Auth
             unset($doc_array['password']);
 
             return $doc_array;
-        } else
+        }
+        else
         {
-            return ['err' => 'User login failed',];
+            return ['err' => 'User login failed'];
         }
     }
 }
