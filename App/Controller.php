@@ -342,7 +342,7 @@ class Controller
             $result['err'] = ($writeError->getMessage());
         }
 
-        if ($updateResult && ($updateResul,gitt->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0)
+        if ($updateResult && ($updateResult->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0)
         {
             $result['err'] = 'The update failed';
         }
