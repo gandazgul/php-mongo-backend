@@ -19,8 +19,12 @@ class Routes
     {
         $controller = new Controller($connection);
 
-        //middleware
+        // middleware for parsing PUT requests
         $app->respond([$controller, 'parse_body']);
+
+        //auth middleware
+        $app->respond([$controller, 'verifyToken']);
+
 
         //home
         $app->get('/', [$controller, 'home']);
