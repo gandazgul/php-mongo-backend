@@ -23,7 +23,7 @@ class Routes
         $app->respond([$controller, 'parse_body']);
 
         //auth middleware
-        $app->respond([$controller, 'verifyToken']);
+        //$app->respond([$controller, 'verifyToken']);
 
 
         //home
