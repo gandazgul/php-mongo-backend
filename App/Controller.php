@@ -146,12 +146,9 @@ class Controller
     function create_collection(Request $req, Response $resp, ServiceProvider $service)
     {
 
-        //$name = $req->paramsPost()->get('name', null);
-        $getName = $req->params();
-
-        if (isset($getName['parsedBody']['name']))
+        if (isset($req->parsedBody['name']))
         {
-            $name = $getName['parsedBody']['name'];
+            $name = $req->parsedBody['name'];
             try
             {
                 $this->db->createCollection($name);
