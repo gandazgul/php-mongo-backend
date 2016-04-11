@@ -8,6 +8,7 @@ use MongoDB\BSON\ObjectID;
 use MongoDB\Client;
 use MongoDB\Database;
 use MongoDB\Driver\Exception\BulkWriteException;
+use MongoDB\Driver\Exception\InvalidArgumentException;
 use MongoDB\Driver\Exception\RuntimeException;
 use MongoDB\Driver\WriteConcern;
 use MongoDB\Model\CollectionInfo;
@@ -251,7 +252,13 @@ class Controller
 
         $collection_con = $this->db->selectCollection($type);
 
-        $doc = $collection_con->findOne(['_id' => new ObjectID($req->param('id'))]);
+        try {
+            $object_id = new ObjectID($req->param('id'));
+        } catch (InvalidArgumentException $e) {
+            return self::send_404($req, $resp);
+        }
+
+        $doc = $collection_con->findOne(['_id' => $object_id]);
 
         if ($doc)
         {
