@@ -44,22 +44,31 @@ class Controller
      */
     static function make_response(Request $req, Response $resp, ServiceProvider $service, $result = [])
     {
-        if (isset($result['err'])) {
+        if (isset($result['err']))
+        {
             $resp->code(500)->body($result['err'])->send();
 
             //ugly way of stopping klein from matching more routes because ->json sends the response
             throw new DispatchHaltedException(null, DispatchHaltedException::SKIP_REMAINING);
-        } elseif (isset($result['code']) && $result['code'] != 200) {
+        }
+        elseif (isset($result['code']) && $result['code'] != 200)
+        {
             $resp->code($result['code']);
         }
 
-        if (array_search($req->headers()['host'], AppSettings::$allowed_origins)) {
-            $resp->header('Access-Control-Allow-Origin', $req->headers()['host']);
-        } elseif (!$req->headers()['host'] == AppSettings::$base_url) {
-            $resp->code(403)->body("Forbidden")->send();
+        if (isset($req->headers()['origin']))
+        {
+            if (array_search($req->headers()['origin'], AppSettings::$allowed_origins) !== false)
+            {
+                $resp->header('Access-Control-Allow-Origin', $req->headers()['origin']);
+            }
+            else
+            {
+                $resp->code(403)->body("Forbidden")->send();
 
-            //ugly way of stopping klein from matching more routes because ->json sends the response
-            throw new DispatchHaltedException(null, DispatchHaltedException::SKIP_REMAINING);
+                // ugly way of stopping klein from matching more routes because ->json sends the response
+                throw new DispatchHaltedException(null, DispatchHaltedException::SKIP_REMAINING);
+            }
         }
 
         $acceptHeader = new AcceptHeader($req->headers()->get('accept'));
@@ -159,8 +168,7 @@ class Controller
                 $this->db->createCollection($name);
 
                 static::make_response($req, $resp, $service);
-            }
-            catch (RuntimeException $e)
+            } catch (RuntimeException $e)
             {
                 static::make_response(
                     $req, $resp, $service, [
@@ -197,8 +205,7 @@ class Controller
                 $this->db->dropCollection($name);
 
                 static::make_response($req, $resp, $service);
-            }
-            catch (RuntimeException $e)
+            } catch (RuntimeException $e)
             {
                 static::make_response(
                     $req, $resp, $service, [
@@ -266,9 +273,11 @@ class Controller
 
         $collection_con = $this->db->selectCollection($type);
 
-        try {
+        try
+        {
             $object_id = new ObjectID($req->param('id'));
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e)
+        {
             return self::send_404($req, $resp);
         }
 
@@ -356,8 +365,7 @@ class Controller
                 $doc,
                 ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]
             );
-        }
-        catch (BulkWriteException $e)
+        } catch (BulkWriteException $e)
         {
             $writeError = $e->getWriteResult()->getWriteErrors()[0];
             $result['err'] = ($writeError->getMessage());
@@ -372,7 +380,7 @@ class Controller
     }
 
     /**
-     * Update entity by id, if the entity doesnt exist it creates it
+     * Update entity by id, if the entity doesn't exist it creates it
      *
      * @param Request $req
      * @param Response $resp
