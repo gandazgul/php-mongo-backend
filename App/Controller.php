@@ -391,8 +391,7 @@ class Controller
             $doc = $req->parsedBody;
             unset($doc['_id']);
             $updateResult = $collection->updateOne(
-                ['_id' => new ObjectID($req->paramsNamed()->get('id'))],
-                $doc,
+                ['_id' => new ObjectID($req->paramsNamed()->get('id'))], ['$set' => $doc],
                 ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]
             );
         } catch (BulkWriteException $e)
