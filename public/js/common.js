@@ -24,7 +24,7 @@ var App = App || {};
     };
 
     /**
-     * Deletes a user
+     * Deletes an entity
      * Called from the details modal and from the delete action on the entity list
      *
      * @param {jQuery} $entityElem
