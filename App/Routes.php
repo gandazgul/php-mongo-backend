@@ -25,7 +25,6 @@ class Routes
         //auth middleware
         //$app->respond([$controller, 'verifyToken']);
 
-
         //home
         $app->get('/', [$controller, 'home']);
 
@@ -50,17 +49,23 @@ class Routes
         /**
          * This route will stand for PUT if it is not available on the client
          */
-        $app->post(
-            '/put/[a:type]/[a:id]', function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
-        {
-            return $controller->update_entity_by_id($req, $resp, $service);
-        });
+        $app->post('/put/[a:type]/[a:id]',
+            function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
+            {
+                return $controller->replace_entity_by_id($req, $resp, $service);
+            });
 
-        $app->put(
-            '/[a:type]/[a:id]', function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
-        {
-            return $controller->update_entity_by_id($req, $resp, $service);
-        });
+        $app->put('/[a:type]/[a:id]',
+            function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
+            {
+                return $controller->replace_entity_by_id($req, $resp, $service);
+            });
+
+        $app->patch('/[a:type]/[a:id]',
+            function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
+            {
+                return $controller->update_entity_by_id($req, $resp, $service);
+            });
 
         /**
          * This route will stand for DELETE if it is not available on the client
@@ -68,9 +73,9 @@ class Routes
         $app->post(
             '/delete/[a:type]/[a:id]',
             function (Request $req, Response $resp, ServiceProvider $service) use ($controller)
-        {
-            return $controller->delete_entity_by_id($req, $resp, $service);
-        });
+            {
+                return $controller->delete_entity_by_id($req, $resp, $service);
+            });
 
         $app->delete(
             '/[a:type]/[a:id]', function (Request $req, Response $resp, ServiceProvider $service) use ($controller)

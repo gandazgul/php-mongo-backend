@@ -341,7 +341,7 @@ class Controller
         return static::make_response($req, $resp, $service, $result);
     }
 
-    function update_entity_by_id(Request $req, Response $resp, ServiceProvider $service)
+    function replace_entity_by_id(Request $req, Response $resp, ServiceProvider $service)
     {
         $collection = $this->db->selectCollection($req->paramsNamed()->get('type'));
         $result = [];
@@ -358,6 +358,44 @@ class Controller
             );
         }
         catch (BulkWriteException $e)
+        {
+            $writeError = $e->getWriteResult()->getWriteErrors()[0];
+            $result['err'] = ($writeError->getMessage());
+        }
+
+        if ($updateResult && ($updateResult->getModifiedCount() + $updateResult->getUpsertedCount()) <= 0)
+        {
+            $result['err'] = 'The update failed';
+        }
+
+        return static::make_response($req, $resp, $service, $result);
+    }
+
+    /**
+     * Update entity by id, if the entity doesnt exist it creates it
+     *
+     * @param Request $req
+     * @param Response $resp
+     * @param ServiceProvider $service
+     *
+     * @return \Klein\AbstractResponse|Response
+     */
+    function update_entity_by_id(Request $req, Response $resp, ServiceProvider $service)
+    {
+        $collection = $this->db->selectCollection($req->paramsNamed()->get('type'));
+        $result = [];
+        $updateResult = null;
+
+        try
+        {
+            $doc = $req->parsedBody;
+            unset($doc['_id']);
+            $updateResult = $collection->updateOne(
+                ['_id' => new ObjectID($req->paramsNamed()->get('id'))],
+                $doc,
+                ['upsert' => true, 'multiple' => false, 'writeConcern' => new WriteConcern(1)]
+            );
+        } catch (BulkWriteException $e)
         {
             $writeError = $e->getWriteResult()->getWriteErrors()[0];
             $result['err'] = ($writeError->getMessage());
