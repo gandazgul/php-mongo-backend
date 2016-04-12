@@ -44,19 +44,23 @@ class Controller
      */
     static function make_response(Request $req, Response $resp, ServiceProvider $service, $result = [])
     {
-        if (isset($result['err']))
-        {
+        if (isset($result['err'])) {
             $resp->code(500)->body($result['err'])->send();
 
             //ugly way of stopping klein from matching more routes because ->json sends the response
             throw new DispatchHaltedException(null, DispatchHaltedException::SKIP_REMAINING);
-        }
-        elseif (isset($result['code']) && $result['code'] != 200)
-        {
+        } elseif (isset($result['code']) && $result['code'] != 200) {
             $resp->code($result['code']);
         }
 
-        $resp->header('Access-Control-Allow-Origin', AppSettings::$base_url);
+        if (array_search($req->headers()['host'], AppSettings::$allowed_origins)) {
+            $resp->header('Access-Control-Allow-Origin', $req->headers()['host']);
+        } elseif (!$req->headers()['host'] == AppSettings::$base_url) {
+            $resp->code(403)->body("Forbidden")->send();
+
+            //ugly way of stopping klein from matching more routes because ->json sends the response
+            throw new DispatchHaltedException(null, DispatchHaltedException::SKIP_REMAINING);
+        }
 
         $acceptHeader = new AcceptHeader($req->headers()->get('accept'));
         $acceptHeader = array_column($acceptHeader->getArrayCopy(), 'raw');
@@ -246,6 +250,16 @@ class Controller
         return static::make_response($req, $resp, $service, $result);
     }
 
+    /**
+     * Gets an entity by id, checks if the ID is valid
+     * If the ID is invalid or the entity is not found returns a 404 response
+     *
+     * @param Request $req
+     * @param Response $resp
+     * @param ServiceProvider $service
+     *
+     * @return Response
+     */
     function get_entity_by_id(Request $req, Response $resp, ServiceProvider $service)
     {
         $type = $req->param('type');

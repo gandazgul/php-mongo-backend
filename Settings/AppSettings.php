@@ -13,5 +13,9 @@ class AppSettings implements SettingsInterface
     /** @var string Time in minutes */
     public static $token_lifetime = '10';
 
+    public static $allowed_origins = [
+        'http://appointments.local',
+    ];
+
     public static function init($environment) { }
 }
