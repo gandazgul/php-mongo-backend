@@ -19,10 +19,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="{ deleteEntity }">Delete
-                        User
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="{ deleteEntity }">
+                        Delete Entity
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="{ updateEntity }">Update User</button>
+                    <button type="button" class="btn btn-primary" onclick="{ updateEntity }">Update Entity</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->

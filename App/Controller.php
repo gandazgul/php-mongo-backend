@@ -62,7 +62,7 @@ class Controller
             {
                 $resp->header('Access-Control-Allow-Origin', $req->headers()['origin']);
             }
-            else
+            elseif ($req->headers()['origin'] != "{$req->server()['REQUEST_SCHEME']}://{$req->headers()['host']}")
             {
                 $resp->code(403)->body("Forbidden")->send();
 
