@@ -12,7 +12,6 @@ use MongoDB\Driver\Exception\InvalidArgumentException;
 use MongoDB\Driver\Exception\RuntimeException;
 use MongoDB\Driver\WriteConcern;
 use MongoDB\Model\CollectionInfo;
-use Settings\AppSettings;
 use Settings\DBSettings;
 
 /**
@@ -54,21 +53,6 @@ class Controller
         elseif (isset($result['code']) && $result['code'] != 200)
         {
             $resp->code($result['code']);
-        }
-
-        if (isset($req->headers()['origin']))
-        {
-            if (array_search($req->headers()['origin'], AppSettings::$allowed_origins) !== false)
-            {
-                $resp->header('Access-Control-Allow-Origin', $req->headers()['origin']);
-            }
-            elseif ($req->headers()['origin'] != "{$req->server()['REQUEST_SCHEME']}://{$req->headers()['host']}")
-            {
-                $resp->code(403)->body("Forbidden")->send();
-
-                // ugly way of stopping klein from matching more routes because ->json sends the response
-                throw new DispatchHaltedException(null, DispatchHaltedException::SKIP_REMAINING);
-            }
         }
 
         $acceptHeader = new AcceptHeader($req->headers()->get('accept'));

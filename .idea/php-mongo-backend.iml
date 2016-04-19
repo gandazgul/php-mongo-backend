@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/public" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/public/js/components" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/klein/klein" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/mongodb/mongodb" />
@@ -11,6 +12,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jquery-1.10.2" level="application" />
+    <orderEntry type="library" name="jquery-1.10.2" level="application" />
+    <orderEntry type="library" name="php-mongo-backend node_modules" level="project" />
     <orderEntry type="module-library">
       <library name="PHP">
         <CLASSES>
@@ -25,7 +28,5 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" name="jquery-1.10.2" level="application" />
-    <orderEntry type="library" name="php-mongo-backend node_modules" level="project" />
   </component>
 </module>
