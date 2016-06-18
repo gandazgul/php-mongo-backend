@@ -42,6 +42,9 @@ class Routes
         //Generic entity Crud
         $app->get('/[a:type]', [$controller, 'get_entity_set']);
 
+        //deletes a list of entities not the entire collection
+        $app->delete('/[a:type]', [$controller, 'batch_delete_entities']);
+
         $app->get('/[a:type]/[a:id]', [$controller, 'get_entity_by_id']);
 
         $app->post('/[a:type]', [$controller, 'create_entity']);

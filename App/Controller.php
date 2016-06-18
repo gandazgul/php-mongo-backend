@@ -415,6 +415,33 @@ class Controller
         return static::make_response($req, $resp, $service, $result);
     }
 
+    function batch_delete_entities(Request $req, Response $resp, ServiceProvider $service)
+    {
+        $collection = $this->db->selectCollection($req->paramsNamed()->get('type'));
+        $modelIDs = $req->parsedBody['entities'];
+        var_dump($modelIDs);
+        die();
+
+        $modelIDs = array_map(function ($id)
+        {
+            return new ObjectID($id);
+        }, $modelIDs);
+
+        $deleteResult = $collection->deleteMany([
+            '_id' => [
+                '$in' => $modelIDs,
+            ],
+        ]);
+
+        $result = [];
+        if ($deleteResult->getDeletedCount() <= 0)
+        {
+            $result['err'] = 'The delete failed.';
+        }
+
+        return static::make_response($req, $resp, $service, $result);
+    }
+
     function verifyToken(Request $req, Response $resp, ServiceProvider $service)
     {
         $result = Auth::verifyToken($req);

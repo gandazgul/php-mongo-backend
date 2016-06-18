@@ -1,7 +1,6 @@
 var App = window.App || {};
 
-(function ($)
-{
+(function ($) {
     var path_parts = location.pathname.split('/');
     App.entity_name = (path_parts && path_parts[1]) || 'users';
 
@@ -21,13 +20,11 @@ var App = window.App || {};
     var entityList = riot.mount('entity-list', {App: App});
     entityList = entityList && entityList[0];
 
-    App.entities.on('sync remove', function ()
-    {
+    App.entities.on('sync remove', function () {
         entityList.update();
     });
 
-    $(document).ready(function ()
-    {
-        App.entities.fetch();
+    $(document).ready(function () {
+        App.entities.fetch({"data": location.search.substr(1)});
     });
 }(jQuery));
